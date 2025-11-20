@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Weather Result</title>
+</head>
+<body style="font-family: Arial; margin: 50px;">
+
+{% if error %}
+    <h3 style="color:red;">{{ error }}</h3>
+{% else %}
+    
+    <div style="text-align: center;">
+        <img src="{{ url_for('static', filename='upec.png') }}" alt="UPEC Logo">
+        <h2>Weather in {{ weather.city }}</h2>
+        <p>Temperature: {{ weather.temp }} °C</p>
+        <p>Humidity: {{ weather.humidity }} %</p>
+        <p>Description: {{ weather.description }}</p>
+        <br>
+        <a href="/">Check another city</a>
+    </div>
+{% endif %}
+
+
+
+</body>
+</html>

@@ -1,12 +1,13 @@
 from flask import Flask, request, jsonify, render_template
 from werkzeug.utils import secure_filename
-import os
+from flask_cors import CORS  # <-- allow cross-origin requests
 from model import load_model, predict_image
 
 app = Flask(__name__)
+CORS(app)  # Enable CORS for all routes
 
 # Max upload = 5MB
-app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024  
+app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024
 ALLOWED_EXT = {'png', 'jpg', 'jpeg'}
 
 # Load model once on startup
@@ -55,3 +56,9 @@ def predict():
 @app.route("/")
 def home():
     return render_template("index.html")
+
+
+if __name__ == "__main__":
+    import os
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=False)

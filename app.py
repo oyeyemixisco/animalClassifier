@@ -14,24 +14,19 @@ ALLOWED_EXT = {'png', 'jpg', 'jpeg'}
 # Load model once on startup
 model = load_model()
 
-@app.before_first_request
-def warmup():
-    print("Warming up model with dummy prediction...")
-    try:
-        from io import BytesIO
-        from PIL import Image
-        import numpy as np
+# Warmup runs exactly once at startup
+print("⏳ Warming up model at startup...")
+try:
+    from io import BytesIO
+    from PIL import Image
+    import numpy as np
 
-        # Create a dummy image similar to your real input shape
-        dummy_img = Image.fromarray(
-            np.uint8(np.zeros((224, 224, 3)))  # adjust size if needed
-        )
+    dummy = Image.fromarray(np.uint8(np.zeros((224, 224, 3))))
+    predict_image(model, dummy)
 
-        # Call your existing prediction function
-        _pred, _conf = predict_image(model, dummy_img)
-        print("Warmup done.")
-    except Exception as e:
-        print("Warmup failed:", e)
+    print("✅ Warmup complete.")
+except Exception as e:
+    print("❌ Warmup failed:", e)
 
 
 def allowed_file(filename):

@@ -2,27 +2,28 @@ import tensorflow as tf
 import numpy as np
 from PIL import Image
 
-# You can keep 224 if you like; just ensure app.py warmup uses same size
-IMG_SIZE = 224
+# Smaller input size to reduce computation
+IMG_SIZE = 160  # MobileNetV2 supports 96, 128, 160, 192, 224
+
 
 def load_model():
     """
-    Load MobileNetV2 once for inference.
-    We freeze it so TensorFlow doesn't keep gradient-related stuff.
-    Optionally, use a smaller alpha to reduce memory usage.
+    Load a smaller MobileNetV2 once for inference.
+    alpha < 1.0 makes the network narrower (lighter).
     """
     model = tf.keras.applications.MobileNetV2(
         weights="imagenet",
         include_top=True,
-        alpha=0.75  # <--- optional: smaller than 1.0 to reduce size
+        alpha=0.35,                        # smaller, lighter model (0.35, 0.5, 0.75, 1.0)
+        input_shape=(IMG_SIZE, IMG_SIZE, 3)
     )
-    model.trainable = False  # we are only inferring, never training
+    model.trainable = False  # inference only
     return model
 
 
 def preprocess(img: Image.Image) -> np.ndarray:
     """
-    Resize and preprocess an RGB PIL image to the format expected by MobileNetV2.
+    Resize and preprocess an RGB PIL image to MobileNetV2 format.
     """
     img = img.resize((IMG_SIZE, IMG_SIZE))
     img = tf.keras.preprocessing.image.img_to_array(img)
@@ -32,8 +33,7 @@ def preprocess(img: Image.Image) -> np.ndarray:
 
 def predict_image(model, file):
     """
-    Take a file-like object (e.g. uploaded file or BytesIO), run it through the model,
-    and map Imagenet labels to CAT/DOG/OTHER.
+    Reads a file-like object, runs through the model, and maps to CAT/DOG/OTHER.
     """
     try:
         img = Image.open(file).convert("RGB")

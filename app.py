@@ -1,7 +1,8 @@
 from flask import Flask, request, jsonify, render_template
 from werkzeug.utils import secure_filename
 from flask_cors import CORS  # <-- allow cross-origin requests
-from model import load_model, predict_image
+from model import load_model, predict_image, IMG_SIZE
+
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
@@ -12,29 +13,29 @@ ALLOWED_EXT = {'png', 'jpg', 'jpeg'}
 
 
 # Load model once on startup
-# Load model once on startup
 model = load_model()
 
+# Warmup runs exactly once at startup
 print("⏳ Warming up model at startup...")
 try:
     from io import BytesIO
     from PIL import Image
     import numpy as np
 
-    # create dummy black image with same size as your model input (adjust if needed)
-    dummy_img = Image.fromarray(np.uint8(np.zeros((224, 224, 3))))
+    # Dummy black image with same size as model input
+    dummy_img = Image.fromarray(np.uint8(np.zeros((IMG_SIZE, IMG_SIZE, 3))))
 
-    # save to buffer to mimic uploaded file
+    # Save to a buffer so it looks like an uploaded file to predict_image()
     buf = BytesIO()
     dummy_img.save(buf, format="JPEG")
     buf.seek(0)
 
-    # now this looks like an uploaded file to predict_image
     predict_image(model, buf)
 
     print("✅ Warmup complete.")
 except Exception as e:
     print("❌ Warmup failed:", e)
+
 
 
 

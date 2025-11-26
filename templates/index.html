@@ -3,90 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <title>Cat vs Dog Classifier</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f2f2f2;
-            padding: 40px;
-            display: flex;
-            justify-content: center;
-        }
-        .container {
-            background: white;
-            padding: 25px;
-            border-radius: 10px;
-            width: 1000px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            text-align: center;
-        }
-        input[type="file"] { margin: 15px 0; }
-        button {
-            background: #2d6cdf;
-            color: white;
-            font-size: 16px;
-            padding: 10px 18px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-        button:hover { background: #1a4fbd; }
-        #result { margin-top: 20px; font-size: 18px; font-weight: bold; padding: 10px; }
-        img { margin-top: 20px; max-width: 100%; border-radius: 8px; }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
 <div class="container">
     <img src="{{ url_for('static', filename='upec.png') }}" alt="UPEC Logo">
     <h2>Cat vs Dog Classifier</h2>
-    <p>Select an image and click predict.</p>
+        <p>Select an image and click Predict.</p>
 
-    <input type="file" id="fileInput" accept="image/*">
-    <br>
-    <button onclick="predict()">Predict</button>
+        <input type="file" id="fileInput" accept="image/*">
 
-    <div id="result"></div>
-    <img id="preview" style="display:none;" />
-</div>
+        <button onclick="predict()">Predict</button>
 
-<script>
-    function predict() {
-        const input = document.getElementById("fileInput");
-        const resultBox = document.getElementById("result");
-        const preview = document.getElementById("preview");
+        <div id="loader">⏳ Getting prediction...</div>
 
-        if (!input.files[0]) {
-            resultBox.innerHTML = "❌ No Image Selected, please select an image.";
-            return;
-        }
+        <div id="result"></div>
+        <img id="preview">
+    </div>
 
-        // Show preview
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            preview.src = e.target.result;
-            preview.style.display = "block";
-        };
-        reader.readAsDataURL(input.files[0]);
+    <script>
+        function predict() {
+            const input = document.getElementById("fileInput");
+            const loader = document.getElementById("loader");
+            const result = document.getElementById("result");
+            const preview = document.getElementById("preview");
 
-        const formData = new FormData();
-        formData.append("file", input.files[0]);
-
-        // Use dynamic URL based on current location (works locally & deployed)
-        fetch(`${window.location.origin}/predict`, {
-            method: "POST",
-            body: formData
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) {
-                resultBox.innerHTML = `Prediction: <b>${data.prediction}</b><br>Confidence Level: ${data.confidence.toFixed(2)}`;
-            } else {
-                resultBox.innerHTML = `❌ Error: ${data.error}`;
+            if (!input.files[0]) {
+                result.innerHTML = "❌ Please select an image.";
+                return;
             }
-        })
-        .catch(err => {
-            resultBox.innerHTML = "❌ Failed to reach server.";
-        });
-    }
+
+            // Show image preview
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                preview.src = e.target.result;
+                preview.style.display = "block";
+            };
+            reader.readAsDataURL(input.files[0]);
+
+            // Show loader
+            loader.style.display = "block";
+            result.innerHTML = "";
+
+            const formData = new FormData();
+            formData.append("file", input.files[0]);
+
+            fetch(`${window.location.origin}/predict`, {
+                method: "POST",
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                loader.style.display = "none"; // hide loader
+
+                if (data.success) {
+                    result.innerHTML = `Prediction: <b>${data.prediction}</b><br>Confidence: ${data.confidence.toFixed(2)}`;
+                } else {
+                    result.innerHTML = `❌ Error: ${data.error}`;
+                }
+            })
+            .catch(() => {
+                loader.style.display = "none";
+                result.innerHTML = "❌ Failed to reach server.";
+            });
+        }
 </script>
+
 </body>
 </html>

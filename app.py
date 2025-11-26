@@ -1,11 +1,9 @@
 from flask import Flask, request, jsonify, render_template
 from werkzeug.utils import secure_filename
-from flask_cors import CORS  # <-- allow cross-origin requests
-from model import load_model, predict_image, IMG_SIZE
-
+import os
+from model import load_model, predict_image
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS for all routes
 
 # Max upload = 5MB
 app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024
@@ -14,30 +12,6 @@ ALLOWED_EXT = {'png', 'jpg', 'jpeg'}
 
 # Load model once on startup
 model = load_model()
-
-# Warmup runs exactly once at startup
-print("⏳ Warming up model at startup...")
-try:
-    from io import BytesIO
-    from PIL import Image
-    import numpy as np
-
-    # Dummy black image with same size as model input
-    dummy_img = Image.fromarray(np.uint8(np.zeros((IMG_SIZE, IMG_SIZE, 3))))
-
-    # Save to a buffer so it looks like an uploaded file to predict_image()
-    buf = BytesIO()
-    dummy_img.save(buf, format="JPEG")
-    buf.seek(0)
-
-    predict_image(model, buf)
-
-    print("✅ Warmup complete.")
-except Exception as e:
-    print("❌ Warmup failed:", e)
-
-
-
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXT
@@ -84,6 +58,5 @@ def home():
 
 
 if __name__ == "__main__":
-    import os
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=False)

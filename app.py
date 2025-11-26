@@ -12,21 +12,30 @@ ALLOWED_EXT = {'png', 'jpg', 'jpeg'}
 
 
 # Load model once on startup
+# Load model once on startup
 model = load_model()
 
-# Warmup runs exactly once at startup
 print("⏳ Warming up model at startup...")
 try:
     from io import BytesIO
     from PIL import Image
     import numpy as np
 
-    dummy = Image.fromarray(np.uint8(np.zeros((224, 224, 3))))
-    predict_image(model, dummy)
+    # create dummy black image with same size as your model input (adjust if needed)
+    dummy_img = Image.fromarray(np.uint8(np.zeros((224, 224, 3))))
+
+    # save to buffer to mimic uploaded file
+    buf = BytesIO()
+    dummy_img.save(buf, format="JPEG")
+    buf.seek(0)
+
+    # now this looks like an uploaded file to predict_image
+    predict_image(model, buf)
 
     print("✅ Warmup complete.")
 except Exception as e:
     print("❌ Warmup failed:", e)
+
 
 
 def allowed_file(filename):

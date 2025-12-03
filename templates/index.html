@@ -15,59 +15,14 @@
 
         <button onclick="predict()">Predict</button>
 
-        <div id="loader">⏳ Getting prediction...</div>
+        <div id="loader-container" class="loader-container" style="display:none;">
+            <div class="underline-loader"></div>
+            <p class="loader-text">Getting prediction…</p>
+        </div>
 
         <div id="result"></div>
         <img id="preview">
     </div>
-
-    <script>
-        function predict() {
-            const input = document.getElementById("fileInput");
-            const loader = document.getElementById("loader");
-            const result = document.getElementById("result");
-            const preview = document.getElementById("preview");
-
-            if (!input.files[0]) {
-                result.innerHTML = "❌ Please select an image.";
-                return;
-            }
-
-            // Show image preview
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                preview.src = e.target.result;
-                preview.style.display = "block";
-            };
-            reader.readAsDataURL(input.files[0]);
-
-            // Show loader
-            loader.style.display = "block";
-            result.innerHTML = "";
-
-            const formData = new FormData();
-            formData.append("file", input.files[0]);
-
-            fetch(`${window.location.origin}/predict`, {
-                method: "POST",
-                body: formData
-            })
-            .then(res => res.json())
-            .then(data => {
-                loader.style.display = "none"; // hide loader
-
-                if (data.success) {
-                    result.innerHTML = `Prediction: <b>${data.prediction}</b><br>Confidence: ${data.confidence.toFixed(2)}`;
-                } else {
-                    result.innerHTML = `❌ Error: ${data.error}`;
-                }
-            })
-            .catch(() => {
-                loader.style.display = "none";
-                result.innerHTML = "❌ Failed to reach server.";
-            });
-        }
-</script>
-
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>
 </html>

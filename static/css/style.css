@@ -27,9 +27,58 @@ button {
 button:hover { background: #1a4fbd; }
 #result { margin-top: 20px; font-size: 18px; font-weight: bold; padding: 10px; }
 img { margin-top: 20px; max-width: 100%; border-radius: 8px; }
-#loader {
-            margin-top: 15px;
-            font-size: 16px;
-            display: none;
-            color: #444;
-        }
+
+/* Dimmed background */
+.loader-container {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    position: fixed;
+    top: 70%;
+    left: 50%;
+    transform: translate(-50%, -50%);  /* centers the box */
+
+    width: 40vw;
+    height: 20vh;
+    background: rgba(0, 0, 0, 0);
+    z-index: 9999;
+    border-radius: 10px; /* optional, looks nicer */
+}
+
+/* Thin underline bar */
+.underline-loader {
+    position: relative;
+    width: 150px;
+    height: 5px;
+    background: #e0e0e0;
+    overflow: hidden;
+    border-radius: 5px;
+}
+
+.underline-loader::before {
+    content: "";
+    position: absolute;
+    height: 100%;
+    width: 40px;  /* moving segment */
+    background: #ff0000; /* YouTube red */
+    animation: slide 0.9s infinite ease-in-out;
+    border-radius: 5px;
+}
+
+/* Moving underline animation */
+@keyframes slide {
+    0%   { left: -40px; }
+    50%  { left: 110px; }
+    100% { left: -40px; }
+}
+
+/* Text under loader */
+.loader-text {
+    margin-top: 10px;
+    font-size: 17px;
+    font-weight: bold;
+    color: #000000;
+    font-family: Arial, sans-serif;
+}

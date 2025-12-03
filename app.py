@@ -5,8 +5,8 @@ from model import load_model, predict_image
 
 app = Flask(__name__)
 
-# Max upload = 5MB
-app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024
+# Max upload = 2MB
+app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024
 ALLOWED_EXT = {'png', 'jpg', 'jpeg'}
 
 
@@ -38,10 +38,19 @@ def predict():
     try:
         filename = secure_filename(file.filename)
         prediction, confidence = predict_image(model, file)
+
+        # Convert numeric confidence to High/Low
+        confidence = float(confidence)
+        if confidence >= 0.6:
+            level = "High"
+        else:
+            level = "Low"
+        
         return jsonify({
             "success": True,
             "prediction": prediction,
-            "confidence": float(confidence)
+            "confidence": confidence,
+            "level": level
         })
 
     except Exception as e:
